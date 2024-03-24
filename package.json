@@ -1,0 +1,28 @@
+{
+  "type": "module",
+  "name": "test2",
+  "version": "1.0.0",
+  "description": "paid org.\r ## Installations\r 1. Visual studio\r 2. mysql\r 3. mysql work bench\r 4. postman",
+  "main": "database.js",
+  "scripts": {
+    "start": "nodemon servers.js",
+    "test": "mocha test.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/pubsub": "^4.3.3",
+    "axios": "^1.6.8",
+    "base-64": "^1.0.0",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.1",
+    "fs": "^0.0.1-security",
+    "fs-extra": "^11.2.0",
+    "mysql2": "^3.9.2",
+    "node-json-logger": "^0.2.1",
+    "nodemon": "^3.1.0",
+    "sequelize": "^6.37.1",
+    "uuid": "^9.0.1"
+  }
+}

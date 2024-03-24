@@ -1,0 +1,99 @@
+name: Integration Tests and Artifact Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install MySQL server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mysql-server
+          sudo systemctl start mysql
+          sudo systemctl status mysql
+          sudo mysql --user=root --password=root -e "CREATE DATABASE IF NOT EXISTS cloudcourse; \
+                                                USE cloudcourse; \
+                                                CREATE TABLE IF NOT EXISTS Users (
+                                                  id CHAR(36) BINARY PRIMARY KEY,
+                                                  firstname VARCHAR(255) NOT NULL,
+                                                  lastname VARCHAR(255) NOT NULL,
+                                                  username VARCHAR(255) NOT NULL UNIQUE,
+                                                  password VARCHAR(255) NOT NULL,
+                                                  createdAt DATETIME NOT NULL,
+                                                  updatedAt DATETIME NOT NULL
+                                                );"
+
+      - name: Set up environment variables
+        run: |
+          echo "DB_DIALECT=mysql" >> $GITHUB_ENV
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
+          echo "DB_USERNAME=root" >> $GITHUB_ENV
+          echo "DB_PASSWORD=root" >> $GITHUB_ENV
+          echo "DB_NAME=cloudcourse" >> $GITHUB_ENV
+      - name: Start server in background
+        run: npm start &
+      - name: Run tests
+        run: npm test
+
+      - name: Build application artifact
+        run: zip -r application.zip ./*
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: application
+          path: application.zip
+
+      - name: Upload script artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: scripts
+          path: |
+            /tmp/nodeinstallement.sh
+            /tmp/permissions.sh
+            /tmp/nodeindex.sh
+            /tmp/ops_agent_install.sh
+            /tmp/ops_config.sh
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          project_id: electric-clone-412119
+          service_account_key: ${{secrets.MYKEY}}
+          export_default_credentials: true
+
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+          version: latest
+
+      - name: Initialize Packer
+        run: packer init packer.pkr.hcl
+
+      - name: Make scripts executable
+        run: |
+          chmod +x nodeinstallement.sh
+          chmod +x permissions.sh
+          chmod +x nodeindex.sh
+          chmod +x ops_agent_install.sh
+          chmod +x ops_config.sh
+
+      - name: Build Google Cloud image with Packer
+        run: packer build packer.pkr.hcl

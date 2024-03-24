@@ -1,0 +1,56 @@
+name: CI Compile check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install MySQL server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mysql-server
+          sudo systemctl start mysql
+          sudo systemctl status mysql
+          sudo mysql --user=root --password=root -e "CREATE DATABASE IF NOT EXISTS cloudcourse; \
+                                                USE cloudcourse; \
+                                                CREATE TABLE IF NOT EXISTS Users (
+                                                  id CHAR(36) BINARY PRIMARY KEY,
+                                                  firstName VARCHAR(255) NOT NULL,
+                                                  lastName VARCHAR(255) NOT NULL,
+                                                  userName VARCHAR(255) NOT NULL UNIQUE,
+                                                  password VARCHAR(255) NOT NULL,
+                                                  createdAt DATETIME NOT NULL,
+                                                  updatedAt DATETIME NOT NULL
+                                                );"
+
+
+      - name: Set up environment variables
+        run: |
+          echo "DB_DIALECT=mysql" >> $GITHUB_ENV
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
+          echo "DB_USERNAME=root" >> $GITHUB_ENV
+          echo "DB_PASSWORD=root" >> $GITHUB_ENV
+          echo "DB_NAME=cloudcourse" >> $GITHUB_ENV
+      - name: Start server in background
+        run: npm start &
+      - name: Run tests
+        run: npm test
+
+      

@@ -1,0 +1,19 @@
+[Unit]
+Description = Node.js Application Service
+After = network.target
+
+[Service]
+Type = simple
+User = csye6225
+Group = csye6225
+WorkingDirectory = /opt/csye6225
+ExecStart = /usr/bin/node /opt/csye6225/server.js
+Restart = always
+RestartSec = 3
+EnvironmentFile = /opt/csye6225/.env 
+StandardOutput = journal
+StandardError = journal
+SyslogIdentifier = nodeindex
+
+[Install]
+WantedBy = multi-user.target
