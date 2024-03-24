@@ -5,7 +5,17 @@ import logger from './logs.js';
 import { PubSub } from '@google-cloud/pubsub';
 
 const pubsub = new PubSub(); // Initialize Pub/Sub client
-const topicName = '<YOUR_TOPIC_NAME>';
+const topicName = 'user-creation-topic';
+const publishMessage = async (payload) => {
+    try {
+        const dataBuffer = Buffer.from(JSON.stringify(payload));
+        await pubsub.topic(topicName).publish(dataBuffer);
+        console.log('Message published');
+    } catch (error) {
+        console.error('Error publishing message:', error);
+        throw error; // Rethrow the error to be caught by the caller
+    }
+};
 // Middleware to authenticate encoded credentials
 export const authenticate = async (req, res, next) => {
     try {
@@ -115,9 +125,4 @@ export const implementRestAPI = (app) => {
             return res.status(400).end();
         }
     });
-    async function publishMessage(payload) {
-        const dataBuffer = Buffer.from(JSON.stringify(payload));
-        await pubsub.topic(topicName).publish(dataBuffer);
-        console.log('Message published');
-    }
 };
