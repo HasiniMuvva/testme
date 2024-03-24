@@ -4,8 +4,8 @@ import { User } from './database.js';
 import logger from './logs.js';
 import { PubSub } from '@google-cloud/pubsub';
 
-const pubsub = new PubSub(); // Initialize Pub/Sub client
-const topicName = 'user-creation-topic';
+const pubsub = new PubSub(); 
+const topicName = 'verify_email';
 const publishMessage = async (payload) => {
     try {
         const dataBuffer = Buffer.from(JSON.stringify(payload));
@@ -13,7 +13,7 @@ const publishMessage = async (payload) => {
         console.log('Message published');
     } catch (error) {
         console.error('Error publishing message:', error);
-        throw error; // Rethrow the error to be caught by the caller
+        throw error;
     }
 };
 // Middleware to authenticate encoded credentials
