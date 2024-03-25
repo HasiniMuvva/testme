@@ -6,17 +6,16 @@ import { PubSub } from '@google-cloud/pubsub';
 
 const pubsub = new PubSub(); 
 const topicName = 'verify_email';
-const publishMessage = async (payload) => {
+async function publishMessageToPubSub(message) {
     try {
-        const dataBuffer = Buffer.from(JSON.stringify(payload));
-        await pubsub.topic(topicName).publish(dataBuffer);
-        console.log('Message published');
+        await pubsub.topic(topicName).publishJSON(message);
+        console.log('Message published to Pub/Sub topic successfully');
     } catch (error) {
-        console.error('Error publishing message:', error);
+        console.error('Error publishing message to Pub/Sub topic:', error);
         throw error;
     }
-};
-// Middleware to authenticate encoded credentials
+}
+//Middleware to authenticate encoded credentials
 export const authenticate = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
@@ -74,7 +73,7 @@ export const implementRestAPI = (app) => {
             }
             const hashedPassword = await bcrypt.hashSync(password, 10);
             const user = await User.create({ username, password: hashedPassword, firstname, lastname });
-            await publishMessage({ username, firstname, lastname });
+            await publishMessageToPubSub(user);
             let userinfo = user.toJSON();
             delete userinfo.createdAt;
             delete userinfo.updatedAt;
