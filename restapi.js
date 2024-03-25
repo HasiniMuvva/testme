@@ -8,13 +8,15 @@ const pubsub = new PubSub();
 const topicName = 'verify_email';
 async function publishMessageToPubSub(message) {
     try {
-        await pubsub.topic(topicName).publishJSON(message);
-        console.log('Message published to Pub/Sub topic successfully');
+        const dataBuffer = Buffer.from(JSON.stringify(message));
+        await pubsub.topic(topicName).publish(dataBuffer);
+        logger.info('Message published to Pub/Sub topic successfully');
     } catch (error) {
-        console.error('Error publishing message to Pub/Sub topic:', error);
+        logger.error('Error publishing message to Pub/Sub topic:', error);
         throw error;
     }
 }
+
 //Middleware to authenticate encoded credentials
 export const authenticate = async (req, res, next) => {
     try {
