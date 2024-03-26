@@ -6,7 +6,6 @@ import { PubSub } from '@google-cloud/pubsub';
 
 const pubsub = new PubSub(); 
 const topicName = 'verify_email';
-const verifiedEmails = new Set();
 async function publishMessageToPubSub(message) {
     try {
         const dataBuffer = Buffer.from(JSON.stringify(message));
@@ -43,12 +42,8 @@ export const authenticate = async (req, res, next) => {
             logger.warn('Password mismatch for user')
             return res.sendStatus(401);
         }
-        console.log('Authentication successful for user:', username);     
+        console.log('Authentication successful for user:', username);
         req.user = user;
-        if (!user || !user.verified) {
-            console.log('Unauthorized: Email not verified');
-            return res.sendStatus(403);
-        }
         next();
     } catch (error) {
         console.error('Error during authentication:', error);
@@ -128,19 +123,6 @@ export const implementRestAPI = (app) => {
             return res.status(204).end();
         } catch (error) {
             console.error('Error updating user:', error);
-            return res.status(400).end();
-        }
-    });
-
-    app.get('/v1/user/verify-email', async (req, res) => {
-        try {
-            const { token } = req.query;
-    
-            // Find user by verification token in the database
-            // If user is found, mark their email as verified
-            // Omitting code for brevity
-        } catch (error) {
-            console.error('Error verifying email:', error);
             return res.status(400).end();
         }
     });
