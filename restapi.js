@@ -126,4 +126,22 @@ export const implementRestAPI = (app) => {
             return res.status(400).end();
         }
     });
+
+    // Verify user
+    app.get('/v1/verify/:userId', async (req, res) => {
+        try {
+            const userId = req.params.userId;
+            const user = await User.findByPk(userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            // Update user's verification status
+            user.verified = true;
+            await user.save();
+            return res.status(200).json({ message: 'User is verified' });
+        } catch (error) {
+            console.error('Error verifying user:', error);
+            return res.status(500).end();
+        }
+    });
 };

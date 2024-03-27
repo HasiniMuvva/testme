@@ -32,6 +32,11 @@ export const userModel = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        verified: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false // Default value is false
+        },
         account_created: {
             type: DataTypes.DATE,
             allowNull: false,
