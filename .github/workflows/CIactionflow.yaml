@@ -35,6 +35,7 @@ jobs:
                                                   firstName VARCHAR(255) NOT NULL,
                                                   lastName VARCHAR(255) NOT NULL,
                                                   userName VARCHAR(255) NOT NULL UNIQUE,
+                                                  verified BOOLEAN NOT NULL DEFAULT FALSE,
                                                   password VARCHAR(255) NOT NULL,
                                                   createdAt DATETIME NOT NULL,
                                                   updatedAt DATETIME NOT NULL
