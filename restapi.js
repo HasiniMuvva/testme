@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { User } from './database.js';
 import logger from './logs.js';
 import { PubSub } from '@google-cloud/pubsub';
+import EmailVerification from './EmailVerification.js';
 
 const pubsub = new PubSub(); 
 const topicName = 'verify_email';
@@ -138,6 +139,14 @@ export const implementRestAPI = (app) => {
             // Update user's verification status
             user.verified = true;
             await user.save();
+
+            // Create a record in EmailVerification table
+            const verification = await EmailVerification.create({
+                userId: userId,
+                email: user.email, // Assuming email is stored
+                sentAt: new Date() // Assuming verification link is clicked now
+            });
+
             return res.status(200).json({ message: 'User is verified' });
         } catch (error) {
             console.error('Error verifying user:', error);
